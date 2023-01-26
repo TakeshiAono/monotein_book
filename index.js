@@ -15,6 +15,7 @@ app.post("/user/register", async(req, res) => {
   try {
     await connectDB()
     await UserModel.create(req.body)
+    console.log(req.body)
     return res.status(200).json({message: "ユーザー登録成功"})
   } catch (error) {
     return res.status(400).json({message: "ユーザー登録失敗"})
@@ -33,7 +34,7 @@ app.post("/user/login", async(req, res) => {
         }
         const token = jwt.sign(payload, secret_key, {expiresIn: "23h"})
         console.log(token)
-        return res.status(200).json({message: "ログイン成功"})
+        return res.status(200).json({message: "ログイン成功", token: token})
       }else{
         return res.status(400).json({message: "パスワードが間違っています"})
       }
@@ -50,7 +51,7 @@ app.get("/", async (req, res) => {
   try{
     await connectDB()
     const allItems = await ItemModel.find()
-    return res.status(200).json({message: "アイテム読み取り成功(オール)", allItmes: allItems})
+    return res.status(200).json({message: "アイテム読み取り成功(オール)", allItems: allItems})
   }catch{
     return res.status(400).json({message: "アイテム読み取り失敗(オール)"})
   }
@@ -98,13 +99,8 @@ app.delete("/item/delete/:id", auth, async (req, res) => {
   try{
     await connectDB()
     const singleItem = await ItemModel.findById(req.params.id)
-    if(singleItem.email === req.body.email){
       await ItemModel.deleteOne({_id: req.params.id})
       return res.status(200).json({message: "アイテム削除成功（シングル）", singleItem: singleItem})
-    }else{
-      throw new Error()
-    }
-    
   }catch{
     return res.status(400).json({message: "アイテム削除失敗（シングル）"})
   }
